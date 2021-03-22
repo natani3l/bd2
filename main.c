@@ -30,48 +30,47 @@ void explicitTransition(PGconn *conn, PGresult *res, FILE* fp) {
 		int i = 0;
 		begin = clock();
 		while (fgets(buffer, buffer_size, fp)) {
-			char str[buffer_size] = "INSERT INTO product (";
-			char str2[buffer_size] = ") VALUES (";
-			column = 0; 
-			row++; 
-			if (row == 1) 
-				continue; 
+		char str[buffer_size] = "INSERT INTO product (";
+		char str2[buffer_size] = ") VALUES (";
+		column = 0; 
+		row++; 
+		if (row == 1) 
+			continue; 
+		char* value = strtok(buffer, ",");
+		while (value)  {
+			if (column == 0 && strcmp ("null", value) != 0) {
+				strcat(str, "product_name");
+				strcat(str2, "'");
+				strcat(str2, value);
+				strcat(str2, "'");
+			} 
 
-			char* value = strtok(buffer, ",");
-			while (value)  {
-				if (column == 0 && strcmp (";", value) != 0) {
-					strcat(str, "product_name");
-					strcat(str2, "'");
-					strcat(str2, value);
-					strcat(str2, "'");
-				
-				} 
+			if (column == 1 && strcmp ("null", value) != 0) {
+				strcat(str, ", brand_name");
+				strcat(str2, ", '");
+				strcat(str2, value);
+				strcat(str2, "'");
+			} 
 
-				if (column == 1 && strcmp (";", value) != 0) {
-					strcat(str, ", brand_name");
-					strcat(str2, ", '");
-					strcat(str2, value);
-					strcat(str2, "'");
-				} 
+			if (column == 2 && strcmp ("null", value) != 0) {
+				strcat(str, ", asin");
+				strcat(str2, ", '");
+				strcat(str2, value);
+				strcat(str2, "'");
+			} 
 
-				if (column == 2 && strcmp (";", value) != 0) {
-					strcat(str, ", asin");
-					strcat(str2, ", '");
-					strcat(str2, value);
-					strcat(str2, "');");
-				} 
-
-				value = strtok(NULL, ",");
-				column++;
-			}
-			strcat(str, str2);
-			res = PQexec(conn, str);
-			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				do_exit(conn);
-			}
-			PQclear(res);
-			i++;
-		} 
+			value = strtok(NULL, ",");
+			column++;
+		}
+		strcat(str, str2);
+		strcat(str, ");");
+		res = PQexec(conn, str);
+		if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+			do_exit(conn);
+		}
+		PQclear(res);
+		i++;
+	} 
 		res = PQexec(conn, "COMMIT");
 		printf("BEGIN END\n");
 		PQclear(res);
@@ -102,7 +101,6 @@ void implicitTransition(PGconn *conn, PGresult *res, FILE* fp) {
 		char* value = strtok(buffer, ",");
 		while (value)  {
 			if (column == 0 && strcmp ("null", value) != 0) {
-				sprintf(str, "product_name");
 				strcat(str, "product_name");
 				strcat(str2, "'");
 				strcat(str2, value);
@@ -292,10 +290,13 @@ int main() {
 		printf("Não foi possível abrir o arquivo CSV");
 	} else {
 		printf("COM TRANSAÇÂO\n");
-		// explicitTransition(conn, res, fp);
+		explicitTransition(conn, res, fp);
 		// printf("\n\n\nSEM TRANSAÇÂO\n");
 		// implicitTransition(conn, res, fp);
-		explicitTransitionRollback(conn, res, fp);
+		
+		// explicitTransitionRollback(conn, res, fp);
+
+		// implicitTransitionRollback(conn, res, fp);
 	}
 
 	return 0;
