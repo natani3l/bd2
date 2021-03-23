@@ -168,7 +168,7 @@ void explicitTransitionRollback(PGconn *conn, PGresult *res, FILE* fp) {
 
 			char* value = strtok(buffer, ",");
 			while (value)  {
-				if (column == 0 && strcmp (";", value) != 0) {
+				if (column == 0 && strcmp ("null", value) != 0) {
 					strcat(str, "product_name");
 					strcat(str2, "'");
 					strcat(str2, value);
@@ -176,14 +176,14 @@ void explicitTransitionRollback(PGconn *conn, PGresult *res, FILE* fp) {
 				
 				} 
 
-				if (column == 1 && strcmp (";", value) != 0) {
+				if (column == 1 && strcmp ("null", value) != 0) {
 					strcat(str, ", brand_name");
 					strcat(str2, ", '");
 					strcat(str2, value);
 					strcat(str2, "'");
 				} 
 
-				if (column == 2 && strcmp (";", value) != 0) {
+				if (column == 2 && strcmp ("null", value) != 0) {
 					strcat(str, ", asin");
 					strcat(str2, ", '");
 					strcat(str2, value);
