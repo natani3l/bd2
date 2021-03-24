@@ -146,13 +146,31 @@ void rollback(PGconn *conn, PGresult *res, FILE* fp) {
 	while (fgets(buffer, buffer_size, fp)) {
 		char str[buffer_size] = "INSERT INTO product (";
 		char str2[buffer_size] = ") VALUES (";
+		
 		row++; 
 		column = 0;
 		if (row == 1) 
 			continue; 
 		char* value = strtok(buffer, ",");
+		if (strcmp ("ERRO", value) == 0) {
+			printf("FUNÇÃO DE ROLLBACK\n");
+			res = PQexec(conn, "ROLLBACK");
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				printf("ROLLBACK ERROR %s", PQerrorMessage(conn));
+				PQclear(res);
+				break;
+			}
+		}
 		while (value)  {
-			if (strcmp ("ERRO", value) == 0) {
+			
+			
+			if (column == 0 && strcmp ("null", value) != 0) {
+				strcat(str, "product_name");
+				strcat(str2, "'");
+				strcat(str2, value);
+				strcat(str2, "'");
+			}
+			if (column == 0 && strcmp ("ERRO", value) != 0) {
 				printf("FUNÇÃO DE ROLLBACK\n");
 				res = PQexec(conn, "ROLLBACK");
 				if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -160,13 +178,6 @@ void rollback(PGconn *conn, PGresult *res, FILE* fp) {
 					PQclear(res);
 					break;
 				}
-			}
-			
-			if (column == 0 && strcmp ("null", value) != 0) {
-				strcat(str, "product_name");
-				strcat(str2, "'");
-				strcat(str2, value);
-				strcat(str2, "'");
 			} 
 
 			if (column == 1 && strcmp ("null", value) != 0) {
@@ -174,6 +185,15 @@ void rollback(PGconn *conn, PGresult *res, FILE* fp) {
 				strcat(str2, ", '");
 				strcat(str2, value);
 				strcat(str2, "'");
+			}
+			if (column == 1 && strcmp ("ERRO", value) != 0) {
+				printf("FUNÇÃO DE ROLLBACK\n");
+				res = PQexec(conn, "ROLLBACK");
+				if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+					printf("ROLLBACK ERROR %s", PQerrorMessage(conn));
+					PQclear(res);
+					break;
+				}
 			} 
 
 			if (column == 2 && strcmp ("null", value) != 0) {
@@ -181,6 +201,15 @@ void rollback(PGconn *conn, PGresult *res, FILE* fp) {
 				strcat(str2, ", '");
 				strcat(str2, value);
 				strcat(str2, "'");
+			}
+			if (column == 2 && strcmp ("ERRO", value) != 0) {
+				printf("FUNÇÃO DE ROLLBACK\n");
+				res = PQexec(conn, "ROLLBACK");
+				if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+					printf("ROLLBACK ERROR %s", PQerrorMessage(conn));
+					PQclear(res);
+					break;
+				}
 			} 
 
 			value = strtok(NULL, ",");
